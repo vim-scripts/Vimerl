@@ -1,0 +1,22 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=3743
+
+Vimerl is a plugin for programming in Erlang. It provides several nice
+features to make your life easier when writing code.
+
+The plugin offers the following features:
+	- Syntax highlighting
+	- Code indenting
+	- Code folding
+	- Code omni completion
+	- Syntax check
+	- Compiler support with QuickFix commands
+	- Code skeletons for the OTP behaviours
+	- Pathogen support (http://github.com/tpope/vim-pathogen)
+
+Note: the plugin is fully documented and stable but bugfixes are always welcomed ;-)
+
+Note: the development is done in GitHub:
+	http://github.com/jimenezrick/vimerl 
+
+Note: this plugin is a very improved version of this:
+	http://github.com/oscarh/vimerl
