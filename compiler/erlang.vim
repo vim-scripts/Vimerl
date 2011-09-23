@@ -2,7 +2,7 @@
 " Language:     Erlang
 " Author:       Pawel 'kTT' Salata <rockplayer.pl@gmail.com>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
-" Version:      2011/09/11
+" Version:      2011/09/23
 
 if exists("current_compiler")
     finish
@@ -30,6 +30,7 @@ command! ErlangDisableShowErrors silent call s:DisableShowErrors()
 command! ErlangEnableShowErrors  silent call s:EnableShowErrors()
 
 function! s:ShowErrors()
+    setlocal shellpipe=>
     if match(getline(1), "#!.*escript") != -1
         setlocal makeprg=escript\ -s\ %
     else
@@ -40,16 +41,14 @@ function! s:ShowErrors()
     for error in getqflist()
         let item         = {}
         let item["lnum"] = error.lnum
-        let item["msg"]  = error.text
+        let item["text"] = error.text
         let b:error_list[error.lnum] = item
         let type = error.type == "W" ? "ErlangWarning" : "ErlangError"
         execute "sign place" b:next_sign_id "line=" . item.lnum "name=" . type "file=" . expand("%:p")
         let b:next_sign_id += 1
     endfor
-    if len(getqflist())
-        redraw!
-    endif
     call s:ShowErrorMsg()
+    setlocal shellpipe&
     setlocal makeprg=make
 endfunction
 
@@ -57,10 +56,10 @@ function! s:ShowErrorMsg()
     let pos = getpos(".")
     if has_key(b:error_list, pos[1])
         let item = get(b:error_list, pos[1])
-        echo item.msg
+        echo item.text
         let b:is_showing_msg = 1
     else
-        if exists("b:is_showing_msg") && b:is_showing_msg == 1
+        if b:is_showing_msg
             echo
             let b:is_showing_msg = 0
         endif
@@ -72,7 +71,7 @@ function! s:ClearErrors()
         execute "sign unplace" id "file=" . expand("%:p")
     endfor
     let b:error_list = {}
-    if exists("b:is_showing_msg") && b:is_showing_msg == 1
+    if b:is_showing_msg
         echo
         let b:is_showing_msg = 0
     endif
@@ -92,7 +91,7 @@ function! s:DisableShowErrors()
 endfunction
 
 CompilerSet makeprg=make
-CompilerSet errorformat=%f:%l:\ %tarning:\ %m,%E%f:%l:\ %m
+CompilerSet errorformat=%W%f:%l:\ Warning:\ %m,%E%f:%l:\ %m
 
 if g:erlang_show_errors
     call s:EnableShowErrors()

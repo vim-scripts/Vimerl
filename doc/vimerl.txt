@@ -17,9 +17,11 @@ Contents                                                              *vimerl*
 
 1.  Intro			|vimerl-intro|
 2.  Usage			|vimerl-usage|
-2.1 Code omni completion	|vimerl-complete|
-2.2 Syntax check		|vimerl-syntax-check|
-2.3 Code skeletons		|vimerl-skeletons|
+2.1 Code indenting		|vimerl-indenting|
+2.2 Code folding		|vimerl-folding|
+2.3 Code omni completion	|vimerl-completion|
+2.4 Syntax check		|vimerl-syntax-check|
+2.5 Code skeletons		|vimerl-skeletons|
 3.  Commands			|vimerl-commands|
 4.  Options			|vimerl-options|
 5.  License			|vimerl-license|
@@ -35,19 +37,28 @@ The plugin offers the following features:
 	- Code indenting
 	- Code folding
 	- Code omni completion
-	- Syntax check
-	- Compiler support with QuickFix commands
+	- Syntax check with QuickFix support
 	- Code skeletons for the OTP behaviours
 	- Pathogen support (http://github.com/tpope/vim-pathogen)
 
 ==============================================================================
 2. Usage                                                        *vimerl-usage*
 
-In this section it is explained how to use some of the features of this
-plugin.
+In this section it is explained how to use the features of this plugin.
 
 ------------------------------------------------------------------------------
-2.1 Code omni completion                                     *vimerl-complete*
+2.1 Code indenting                                          *vimerl-indenting*
+
+All the code you write is automatically indented. To reindent a block of code
+use the |=| or |v_=| command.
+
+------------------------------------------------------------------------------
+2.2 Code folding                                              *vimerl-folding*
+
+In order to enable/disable code folding see the |'foldenable'| Vim option.
+
+------------------------------------------------------------------------------
+2.3 Code omni completion                                   *vimerl-completion*
 
 The omni completion may be used after writing the name of a module followed by
 a colon (e.g. "lists:") pressing afterwards CTRL-X CTRL-O. The omni completion
@@ -60,15 +71,18 @@ man-pages installed.
 Note: it is required to have in your $PATH the escript program.
 
 ------------------------------------------------------------------------------
-2.2 Syntax check                                         *vimerl-syntax-check*
+2.4 Syntax check with QuickFix support                   *vimerl-syntax-check*
 
-When syntax check is enabled, whenever the file is written, the file is
-checked for syntax errors using the Erlang compiler.
+When syntax check is enabled, whenever the file is written, it is checked for
+syntax errors using the Erlang compiler. The error message of the current line
+is shown at the bottom. |signs| are used to indicate lines with errors.
+
+You can also use the |quickfix| commands to navigate through the errors.
 
 Note: look in the commands section how to enable/disabling the syntax check.
 
 ------------------------------------------------------------------------------
-2.3 Code skeletons                                          *vimerl-skeletons*
+2.5 Code skeletons                                          *vimerl-skeletons*
 
 It is possible to load a code skeleton for one of the OTP behaviours.
 
@@ -77,13 +91,13 @@ Note: look in the commands section how to load a skeleton.
 ==============================================================================
 3. Commands                                                  *vimerl-commands*
 
-                                                    *:ErlangDisableShowErrors*
-Disables syntax check and hides current errors: >
-	:ErlangDisableShowErrors
-<
                                                      *:ErlangEnableShowErrors*
 Enables syntax check: >
 	:ErlangEnableShowErrors
+<
+                                                    *:ErlangDisableShowErrors*
+Disables syntax check and hides current errors: >
+	:ErlangDisableShowErrors
 <
                                                           *:ErlangApplication*
 Loads an OTP application skeleton: >

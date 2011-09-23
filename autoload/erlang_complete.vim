@@ -4,7 +4,7 @@
 " Contributors: kTT (http://github.com/kTT)
 "               Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
-" Version:      2011/09/10
+" Version:      2011/09/23
 
 " Completion options
 if !exists('g:erlang_completion_grep')
@@ -102,7 +102,6 @@ function s:ErlangFindExternalFunc(module, base)
 	" If it is a local module, try to compile it
 	if filereadable(a:module . '.erl') && !filereadable(a:module . '.beam')
 		silent execute '!erlc' a:module . '.erl' '>/dev/null' '2>/dev/null'
-		redraw!
 	endif
 
 	let functions = system(s:erlang_complete_file . ' ' . a:module)
