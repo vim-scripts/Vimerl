@@ -55,7 +55,8 @@ use the |=| or |v_=| command.
 ------------------------------------------------------------------------------
 2.2 Code folding                                              *vimerl-folding*
 
-In order to enable/disable code folding see the |'foldenable'| Vim option.
+In order to enable/disable code folding see the |'foldenable'| Vim option and
+also enable the |'erlang_folding'| option.
 
 ------------------------------------------------------------------------------
 2.3 Code omni completion                                   *vimerl-completion*
@@ -63,12 +64,6 @@ In order to enable/disable code folding see the |'foldenable'| Vim option.
 The omni completion may be used after writing the name of a module followed by
 a colon (e.g. "lists:") pressing afterwards CTRL-X CTRL-O. The omni completion
 can be used with functions from the OTP or from your local modules.
-
-Note: the information needed for the omni completion with the OTP is extracted
-from the man-pages, so look in the options section to customize where are your
-man-pages installed.
-
-Note: it is required to have in your $PATH the escript program.
 
 ------------------------------------------------------------------------------
 2.4 Syntax check with QuickFix support                   *vimerl-syntax-check*
@@ -127,6 +122,13 @@ Note: all the previous commands are applied to the current buffer.
 The following options offer the possibility to customize the plugin behaviour.
 
 ------------------------------------------------------------------------------
+                                                            *'erlang_folding'*
+
+This option controls whether automatic code folding is enabled or disabled
+(default: 0, values: 0 or 1): >
+	:let erlang_folding = 0
+
+------------------------------------------------------------------------------
                                                       *'erlang_highlight_bif'*
 
 This option controls whether BIF functions are highlighted as keywords
@@ -146,16 +148,16 @@ content of the current buffer (default: 1, values: 0 or 1): >
 This option defines the information used to fill the skeleton header. If this
 variable is not defined, then the header is not included (default: undefined,
 values: dictionary): >
-	:let erlang_skel_header = {"author": {name},
-				   "owner" : {owner},
-				   "year"  : {year}}
+	:let erlang_skel_header = {"author": "Foo Bar",
+				   "owner" : "Fubar",
+				   "year"  : "2000"}
 
 Note: the "year" key may be omitted, in that case the current year is used.
 
 ------------------------------------------------------------------------------
                                                          *'erlang_keywordprg'*
 
-This option defines the command used to show man-pages with the |K| command
+This option defines the command used to show man pages with the |K| command
 (default: "erl -man", values: string): >
 	:let erlang_keywordprg = "erl -man"
 
@@ -170,26 +172,11 @@ values: 0 or 1): >
                                                     *'erlang_completion_grep'*
 
 This option defines the grep program used for omni completion (default:
-"grep", values: string): >
-	:let erlang_completion_grep = "grep"
+"zgrep", values: string): >
+	:let erlang_completion_grep = "zgrep"
 
-Note: if your man-pages are compressed use "zgrep".
-
-------------------------------------------------------------------------------
-                                                      *'erlang_man_extension'*
-
-This option defines the filename extension used in the man-pages
-(default: "", values: string): >
-	:let erlang_man_extension = ""
-
-Note: if your man-pages are compressed put their extension (e.g. ".gz").
-
-------------------------------------------------------------------------------
-                                                           *'erlang_man_path'*
-
-This option defines the location of the man-pages (default:
-"/usr/lib/erlang/man", values: string): >
-	:let erlang_man_path = "/usr/lib/erlang/man"
+Note: zgrep is able to handle compressed and uncompressed man pages, change it
+to "grep" if you don't have installed.
 
 ------------------------------------------------------------------------------
                                              *'erlang_completion_display_doc'*

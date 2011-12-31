@@ -3,7 +3,7 @@
 " Author:       Oscar Hellström <oscar@oscarh.net>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
-" Version:      2011/09/11
+" Version:      2011/11/21
 
 if exists('b:did_ftplugin')
 	finish
@@ -22,6 +22,10 @@ if !exists('g:erlang_keywordprg')
 	let g:erlang_keywordprg = 'erl -man'
 endif
 
+if !exists('g:erlang_folding')
+	let g:erlang_folding = 0
+endif
+
 " Local settings
 function s:SetErlangOptions()
 	compiler erlang
@@ -29,9 +33,11 @@ function s:SetErlangOptions()
 		setlocal omnifunc=erlang_complete#Complete
 	endif
 
-	setlocal foldmethod=expr
-	setlocal foldexpr=GetErlangFold(v:lnum)
-	setlocal foldtext=ErlangFoldText()
+	if g:erlang_folding
+		setlocal foldmethod=expr
+		setlocal foldexpr=GetErlangFold(v:lnum)
+		setlocal foldtext=ErlangFoldText()
+	endif
 
 	setlocal comments=:%%%,:%%,:%
 	setlocal commentstring=%%s

@@ -2,13 +2,17 @@
 " Language:     Erlang
 " Author:       Pawel 'kTT' Salata <rockplayer.pl@gmail.com>
 " Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
-" Version:      2011/09/23
+" Version:      2011/12/14
 
 if exists("current_compiler")
     finish
 else
     let current_compiler = "erlang"
 endif
+
+let b:error_list     = {}
+let b:is_showing_msg = 0
+let b:next_sign_id   = 1
 
 if exists(":CompilerSet") != 2
     command -nargs=* CompilerSet setlocal <args>
@@ -18,18 +22,21 @@ if !exists("g:erlang_show_errors")
     let g:erlang_show_errors = 1
 endif
 
+" Only define functions and script scope variables once
+if exists("*s:ShowErrors")
+    finish
+endif
+
 let s:erlang_check_file = expand("<sfile>:p:h") . "/erlang_check.erl"
-let b:error_list        = {}
-let b:is_showing_msg    = 0
-let b:next_sign_id      = 1
+let s:autocmds_defined  = 0
 
 sign define ErlangError   text=>> texthl=Error
 sign define ErlangWarning text=>> texthl=Todo
 
-command! ErlangDisableShowErrors silent call s:DisableShowErrors()
-command! ErlangEnableShowErrors  silent call s:EnableShowErrors()
+command ErlangDisableShowErrors silent call s:DisableShowErrors()
+command ErlangEnableShowErrors  silent call s:EnableShowErrors()
 
-function! s:ShowErrors()
+function s:ShowErrors()
     setlocal shellpipe=>
     if match(getline(1), "#!.*escript") != -1
         setlocal makeprg=escript\ -s\ %
@@ -47,12 +54,11 @@ function! s:ShowErrors()
         execute "sign place" b:next_sign_id "line=" . item.lnum "name=" . type "file=" . expand("%:p")
         let b:next_sign_id += 1
     endfor
-    call s:ShowErrorMsg()
     setlocal shellpipe&
     setlocal makeprg=make
 endfunction
 
-function! s:ShowErrorMsg()
+function s:ShowErrorMsg()
     let pos = getpos(".")
     if has_key(b:error_list, pos[1])
         let item = get(b:error_list, pos[1])
@@ -66,28 +72,31 @@ function! s:ShowErrorMsg()
     endif
 endf
 
-function! s:ClearErrors()
-    for id in range(1, b:next_sign_id - 1)
-        execute "sign unplace" id "file=" . expand("%:p")
-    endfor
-    let b:error_list = {}
+function s:ClearErrors()
+    sign unplace *
+    let b:error_list   = {}
+    let b:next_sign_id = 1
     if b:is_showing_msg
         echo
         let b:is_showing_msg = 0
     endif
 endfunction
 
-function! s:EnableShowErrors()
-    autocmd BufWritePost *.erl call s:ShowErrors()
-    autocmd CursorHold   *.erl call s:ShowErrorMsg()
-    autocmd CursorMoved  *.erl call s:ShowErrorMsg()
+function s:EnableShowErrors()
+    if !s:autocmds_defined
+        autocmd BufWritePost *.erl call s:ShowErrors()
+        autocmd CursorHold   *.erl call s:ShowErrorMsg()
+        autocmd CursorMoved  *.erl call s:ShowErrorMsg()
+        let s:autocmds_defined = 1
+    endif
 endfunction
 
-function! s:DisableShowErrors()
+function s:DisableShowErrors()
     sign unplace *
     autocmd! BufWritePost *.erl
     autocmd! CursorHold   *.erl
     autocmd! CursorMoved  *.erl
+    let s:autocmds_defined = 0
 endfunction
 
 CompilerSet makeprg=make

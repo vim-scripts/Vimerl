@@ -4,19 +4,11 @@
 " Contributors: kTT (http://github.com/kTT)
 "               Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
 "               Eduardo Lopez (http://github.com/tapichu)
-" Version:      2011/09/23
+" Version:      2011/09/29
 
 " Completion options
 if !exists('g:erlang_completion_grep')
-	let g:erlang_completion_grep = 'grep'
-endif
-
-if !exists('g:erlang_man_extension')
-	let g:erlang_man_extension = ''
-endif
-
-if !exists('g:erlang_man_path')
-	let g:erlang_man_path = '/usr/lib/erlang/man'
+	let g:erlang_completion_grep = 'zgrep'
 endif
 
 if !exists('g:erlang_completion_display_doc')
@@ -25,6 +17,12 @@ endif
 
 " Completion program path
 let s:erlang_complete_file = expand('<sfile>:p:h') . '/erlang_complete.erl'
+
+" Man pages path
+let s:erlang_man_path = system("grep ^ROOTDIR= $(which erl) | sed 's/^.*=//'")[:-2] . '/man'
+
+" Modules cache used to speed up the completion
+let s:modules_cache = {}
 
 " Patterns for completions
 let s:erlang_local_func_beg    = '\(\<[0-9A-Za-z_-]*\|\s*\)$'
@@ -99,9 +97,28 @@ endfunction
 
 " Find external function names
 function s:ErlangFindExternalFunc(module, base)
-	" If it is a local module, try to compile it
-	if filereadable(a:module . '.erl') && !filereadable(a:module . '.beam')
-		silent execute '!erlc' a:module . '.erl' '>/dev/null' '2>/dev/null'
+	" If it is a local module, try to compile it when the .beam
+	" doesn't exist or is old
+	if filereadable(a:module . '.erl')
+		if !filereadable(a:module . '.beam') ||
+				\ getftime(a:module . '.erl') > getftime(a:module . '.beam')
+			if has_key(s:modules_cache, a:module)
+				call remove(s:modules_cache, a:module)
+			endif
+			silent execute '!erlc' a:module . '.erl' '>/dev/null' '2>/dev/null'
+			redraw!
+		endif
+	endif
+
+	" If the module is cached, load its functions
+	if has_key(s:modules_cache, a:module)
+		for field_cache in get(s:modules_cache, a:module)
+			if match(field_cache.word, a:base) == 0
+				call complete_add(field_cache)
+			endif
+		endfor
+
+		return []
 	endif
 
 	let functions = system(s:erlang_complete_file . ' ' . a:module)
@@ -110,14 +127,14 @@ function s:ErlangFindExternalFunc(module, base)
 			let function_name = matchstr(element, a:base . '\w*')
 			let number_of_args = matchstr(element, '\d\+', len(function_name))
 			let number_of_comma = max([number_of_args - 1, 0])
-			let file_path = g:erlang_man_path . '/man?/' . a:module . '.?' . g:erlang_man_extension
+			let file_path = s:erlang_man_path . '/man?/' . a:module . '.*'
 			let description = ''
 
 			" Don't look man pages if the module is present in the current directory
-			if g:erlang_completion_display_doc != 0 && !filereadable(a:module . '.erl')
+			if g:erlang_completion_display_doc != 0 && !filereadable(a:module . '.beam')
 				let system_command = g:erlang_completion_grep . ' -A 1 "\.B" ' . file_path .
-							\ ' | grep -EZo "\<' . function_name . '\>\((\[?\w+,\]? ){' .
-							\ number_of_comma . '}[^),]*\) -> .*"'
+						   \ ' | grep -Eo "\<' . function_name . '\>\((\[?\w+,\]? ){' .
+						   \ number_of_comma . '}[^),]*\) -> .*"'
 				let description = system(system_command)
 
 				" Cutting some weird characters at the end with `[:-2]'
@@ -134,8 +151,28 @@ function s:ErlangFindExternalFunc(module, base)
 			endif
 
 			let field = {'word': function_name . '(', 'abbr': description,
-						\'kind': 'f', 'dup': 1} " Allow to duplicate functions
+				  \  'kind': 'f', 'dup': 1} " Allow duplicated functions
 			call complete_add(field)
+
+			" Populate the cache only when iterating over all the
+			" module functions (i.e. no prefix for the completion)
+			if a:base == ''
+				if !has_key(s:modules_cache, a:module)
+					let s:modules_cache[a:module] = [field]
+				else
+					let fields_cache = get(s:modules_cache, a:module)
+					let s:modules_cache[a:module] = add(fields_cache, field)
+				endif
+			endif
+
+			" The user entered some text, so stop the completion
+			if complete_check()
+				" The module couldn't be entirely cached
+				if has_key(s:modules_cache, a:module)
+					call remove(s:modules_cache, a:module)
+				endif
+				break
+			endif
 		endif
 	endfor
 
@@ -157,7 +194,7 @@ function s:ErlangFindLocalFunc(base)
 		let line = getline(lnum)
 		let function_name = matchstr(line, '^' . base . '[0-9A-Za-z_-]\+(\@=')
 		if function_name != ""
-			call complete_add(function_name)
+			call complete_add({'word': function_name, 'kind': 'f'})
 		endif
 		let lnum = s:ErlangFindNextNonBlank(lnum)
 	endwhile
