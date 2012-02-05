@@ -1,8 +1,9 @@
 " Vim syntax file
 " Language:     Erlang
-" Author:       Oscar Hellström <oscar@oscarh.net> (http://oscar.hellstrom.st)
-" Contributors: Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
-" Version:      2011/09/11
+" Author:       Oscar HellstrÃ¶m <oscar@oscarh.net> (http://oscar.hellstrom.st)
+" Contributors: Ricardo Catalinas JimÃ©nez <jimenezrick@gmail.com>
+" License:      Vim license
+" Version:      2012/01/18
 
 if exists("b:current_syntax")
 	finish
@@ -41,9 +42,9 @@ syn keyword erlangBoolean                    true false
 
 syn keyword erlangGuard                      is_list is_alive is_atom is_binary is_bitstring is_boolean is_tuple is_number is_integer is_float is_function is_constant is_pid is_port is_reference is_record is_process_alive
 
-syn match erlangOperator                     /\/\|*\|+\|-\|++\|--/
-syn match erlangOperator                     /->\|<-\|||\||\|!\|=/
-syn match erlangOperator                     /=:=\|==\|\/=\|=\/=\|<\|>\|=<\|>=/
+syn match   erlangOperator                   /\/\|*\|+\|-\|++\|--/
+syn match   erlangOperator                   /->\|<-\|||\||\|!\|=/
+syn match   erlangOperator                   /=:=\|==\|\/=\|=\/=\|<\|>\|=<\|>=/
 syn keyword erlangOperator                   div rem
 
 syn region erlangString                      start=/"/ end=/"/ skip=/\\/ contains=@Spell,erlangStringModifier
@@ -57,13 +58,13 @@ syn match erlangRecord                       /#\w\+/
 syn match erlangTuple                        /{\|}/
 syn match erlangList                         /\[\|\]/
 
-syn match erlangAttribute                    /^-\%(vsn\|author\|copyright\|compile\|deprecated\|module\|export\|import\|behaviour\|behavior\|export_type\|ignore_xref\|on_load\)\s*(\@=/
+syn match erlangAttribute                    /^-\%(vsn\|author\|copyright\|compile\|deprecated\|module\|export\|import\|behaviour\|behavior\|export_type\|ignore_xref\|on_load\|mode\)\s*(\@=/
 syn match erlangInclude                      /^-include\%(_lib\)\?\s*(\@=/
 syn match erlangRecordDef                    /^-record\s*(\@=/
 syn match erlangDefine                       /^-\%(define\|undef\)\s*(\@=/
 syn match erlangPreCondit                    /^-\%(ifdef\|ifndef\|else\|endif\)\%(\s*(\@=\)\?/
 
-syn match erlangType                         /^-\%(spec\|type\)[( ]\@=/
+syn match erlangType                         /^-\%(spec\|type\|opaque\|callback\)[( ]\@=/
 
 syn match erlangMacro                        /\%(-define(\)\@<=\w\+/
 syn match erlangMacro                        /?\??\w\+/
@@ -71,12 +72,12 @@ syn match erlangMacro                        /?\??\w\+/
 syn match erlangBitType                      /\%(\/\|-\)\@<=\%(bits\|bitstring\|binary\|integer\|float\|unit\)\>/
 syn match erlangBitSize                      /:\@<=[0-9]\+/
 
-syn match erlangBinary                      /<<\|>>/
+syn match erlangBinary                       /<<\|>>/
 
 " BIFs
-syn match erlangBIF                          /\%([^:0-9A-Za-z_]\|\<erlang:\)\@<=\%(abs\|apply\|atom_to_binary\|atom_to_list\|binary_part\|binary_to_atom\|binary_to_existing_atom\|binary_to_list\|binary_to_term\|bit_size\|bitstring_to_list\|byte_size\|check_process_code\|date\|delete_module\|demonitor\|disconnect_node\|element\|erase\|exit\|float\|float_to_list\|garbage_collect\|get\|get_keys\|group_leader\|hd\|integer_to_list\|iolist_size\|iolist_to_binary\|is_alive\|is_atom\|is_binary\|is_bitstring\|is_boolean\|is_float\|is_function\|is_integer\|is_list\|is_number\|is_pid\|is_port\|is_process_alive\|is_record\|is_reference\|is_tuple\|length\|link\|list_to_atom\|list_to_binary\|list_to_bitstring\|list_to_existing_atom\|list_to_float\|list_to_integer\|list_to_pid\|list_to_tuple\|load_module\|make_ref\|max\|min\|module_loaded\|monitor\|monitor_node\|node\|nodes\|now\|open_port\|pid_to_list\|port_close\|port_command\|port_connect\|port_control\|pre_loaded\|processes\|process_flag\|process_info\|purge_module\|put\|register\|registered\|round\|self\|setelement\|size\|spawn\|spawn_link\|spawn_monitor\|spawn_opt\|split_binary\|statistics\|term_to_binary\|time\|tl\|trunc\|tuple_size\|tuple_to_list\|unlink\|unregister\|whereis\)\%((\|\/[0-9]\)\@=/
-syn match erlangBIF                          /\<\%(erlang:\)\@<=\%(append_element\|bump_reductions\|cancel_timer\|decode_packet\|display\|function_exported\|fun_info\|fun_to_list\|get_cookie\|get_stacktrace\|hash\|is_builtin\|loaded\|load_nif\|localtime\|localtime_to_universaltime\|make_tuple\|memory\|monitor_node\|phash\|port_call\|port_info\|ports\|port_to_list\|process_display\|read_timer\|ref_to_list\|resume_process\|send\|send_after\|send_nosuspend\|set_cookie\|start_timer\|suspend_process\|system_flag\|system_info\|system_monitor\|system_profile\|trace\|trace_delivered\|trace_info\|trace_pattern\|universaltime\|universaltime_to_localtime\|yield\)(\@=/
-syn match erlangGBIF                         /erlang\%(:\w\)\@=/
+syn match erlangBIF                          /\%([^:0-9A-Za-z_]\|\<erlang:\|^\)\@<=\%(abs\|apply\|atom_to_binary\|atom_to_list\|binary_part\|binary_to_atom\|binary_to_existing_atom\|binary_to_list\|binary_to_term\|bit_size\|bitstring_to_list\|byte_size\|check_process_code\|date\|delete_module\|demonitor\|disconnect_node\|element\|erase\|error\|exit\|float\|float_to_list\|garbage_collect\|get\|get_keys\|group_leader\|halt\|hd\|integer_to_list\|iolist_size\|iolist_to_binary\|is_alive\|is_atom\|is_binary\|is_bitstring\|is_boolean\|is_float\|is_function\|is_integer\|is_list\|is_number\|is_pid\|is_port\|is_process_alive\|is_record\|is_reference\|is_tuple\|length\|link\|list_to_atom\|list_to_binary\|list_to_bitstring\|list_to_existing_atom\|list_to_float\|list_to_integer\|list_to_pid\|list_to_tuple\|load_module\|make_ref\|max\|min\|module_loaded\|monitor\|monitor_node\|node\|nodes\|now\|open_port\|pid_to_list\|port_close\|port_command\|port_connect\|port_control\|pre_loaded\|processes\|process_flag\|process_info\|purge_module\|put\|register\|registered\|round\|self\|setelement\|size\|spawn\|spawn_link\|spawn_monitor\|spawn_opt\|split_binary\|statistics\|term_to_binary\|throw\|time\|tl\|trunc\|tuple_size\|tuple_to_list\|unlink\|unregister\|whereis\)\%((\|\/[0-9]\)\@=/
+syn match erlangBIF                          /\%(\<erlang:\)\@<=\%(append_element\|bump_reductions\|cancel_timer\|decode_packet\|display\|function_exported\|fun_info\|fun_to_list\|get_cookie\|get_stacktrace\|hash\|is_builtin\|loaded\|load_nif\|localtime\|localtime_to_universaltime\|make_tuple\|memory\|monitor_node\|phash\|port_call\|port_info\|ports\|port_to_list\|process_display\|read_timer\|ref_to_list\|resume_process\|send\|send_after\|send_nosuspend\|set_cookie\|start_timer\|suspend_process\|system_flag\|system_info\|system_monitor\|system_profile\|trace\|trace_delivered\|trace_info\|trace_pattern\|universaltime\|universaltime_to_localtime\|yield\)(\@=/
+syn match erlangGBIF                         /\<erlang\%(:\w\)\@=/
 
 " Link Erlang stuff to Vim groups
 hi link erlangTodo           Todo

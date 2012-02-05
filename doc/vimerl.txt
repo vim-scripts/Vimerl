@@ -19,8 +19,8 @@ Contents                                                              *vimerl*
 2.  Usage			|vimerl-usage|
 2.1 Code indenting		|vimerl-indenting|
 2.2 Code folding		|vimerl-folding|
-2.3 Code omni completion	|vimerl-completion|
-2.4 Syntax check		|vimerl-syntax-check|
+2.3 Code omni completion	|vimerl-omni-completion|
+2.4 Syntax checking		|vimerl-syntax-checking|
 2.5 Code skeletons		|vimerl-skeletons|
 3.  Commands			|vimerl-commands|
 4.  Options			|vimerl-options|
@@ -37,9 +37,10 @@ The plugin offers the following features:
 	- Code indenting
 	- Code folding
 	- Code omni completion
-	- Syntax check with QuickFix support
+	- Syntax checking with |quickfix| support
 	- Code skeletons for the OTP behaviours
-	- Pathogen support (http://github.com/tpope/vim-pathogen)
+	- Uses configuration from Rebar
+	- Pathogen compatible (http://github.com/tpope/vim-pathogen)
 
 ==============================================================================
 2. Usage                                                        *vimerl-usage*
@@ -52,6 +53,22 @@ In this section it is explained how to use the features of this plugin.
 All the code you write is automatically indented. To reindent a block of code
 use the |=| or |v_=| command.
 
+The code indenting feature it's implemented as an Erlang escript that helps
+Vim parsing code and calculating the indentation level of each line. This
+escript communicates with Vim through a pair of named pipes located in the
+"indent/" folder where Vimerl is installed.
+
+It is recommended to enable the Vim option |'expandtab'|, with it the code
+will be indented more nicely lining up columns when possible.
+
+If Vim freezes while editing an Erlang code file, it's probably caused by a
+bug in the escript which crashed and Vim is waiting for it to respond. So, if
+that happens to you, kill Vim and reopen the file. It also would be nice to
+report the bug to me :-)
+
+Note: indenting a large block of lines with the |=| or |v_=| command will take
+      some time to finish.
+
 ------------------------------------------------------------------------------
 2.2 Code folding                                              *vimerl-folding*
 
@@ -59,22 +76,47 @@ In order to enable/disable code folding see the |'foldenable'| Vim option and
 also enable the |'erlang_folding'| option.
 
 ------------------------------------------------------------------------------
-2.3 Code omni completion                                   *vimerl-completion*
+2.3 Code omni completion                              *vimerl-omni-completion*
 
 The omni completion may be used after writing the name of a module followed by
 a colon (e.g. "lists:") pressing afterwards CTRL-X CTRL-O. The omni completion
 can be used with functions from the OTP or from your local modules.
 
+Using omni completion not after a module name, will make it show local
+functions from the current module.
+
+Vimerl will use to suggest function names, EDoc and "mod:module_info/1" from
+the target module. Thus searching for the .beam and .erl files will be
+necessary. For that, the default Erlang code path will be used, including the
+current directory, plus "ebin/" and "src/".
+
+If your project uses Rebar, Vimerl will search the value of "deps_dir" in
+"rebar.config", with "deps/" as default, to also let you use omni completion
+on dependency modules.
+
+Note: the user is responsible for having compiled his project so that Vimerl
+      finds the .beam files.
+
+Note: it is recommended to start Vim on the project's root directory, which
+      should have the standard directory structure for an OTP application.
+
 ------------------------------------------------------------------------------
-2.4 Syntax check with QuickFix support                   *vimerl-syntax-check*
+2.4 Syntax checking with quickfix support             *vimerl-syntax-checking*
 
-When syntax check is enabled, whenever the file is written, it is checked for
-syntax errors using the Erlang compiler. The error message of the current line
-is shown at the bottom. |signs| are used to indicate lines with errors.
+When syntax checking is enabled, whenever the file is written, it is checked
+for syntax errors using the Erlang compiler. The error message of the current
+line is shown at the bottom. |signs| are used to indicate lines with errors
+and warnings.
 
-You can also use the |quickfix| commands to navigate through the errors.
+Vimerl will search for your modules source code in the current directory and
+"src/". It also will use "include/" directory for the headers.
 
-Note: look in the commands section how to enable/disabling the syntax check.
+If your project uses Rebar, Vimerl will search the value of "erl_opts" in
+"rebar.config" to know how to compile your modules.
+
+You can also use the |quickfix| commands to navigate through the errors list.
+
+Note: look in the commands section how to enable/disable the syntax checking.
 
 ------------------------------------------------------------------------------
 2.5 Code skeletons                                          *vimerl-skeletons*
@@ -87,11 +129,11 @@ Note: look in the commands section how to load a skeleton.
 3. Commands                                                  *vimerl-commands*
 
                                                      *:ErlangEnableShowErrors*
-Enables syntax check: >
+Enables syntax checking: >
 	:ErlangEnableShowErrors
 <
                                                     *:ErlangDisableShowErrors*
-Disables syntax check and hides current errors: >
+Disables syntax checking and hides current errors: >
 	:ErlangDisableShowErrors
 <
                                                           *:ErlangApplication*
@@ -164,35 +206,24 @@ This option defines the command used to show man pages with the |K| command
 ------------------------------------------------------------------------------
                                                         *'erlang_show_errors'*
 
-This option controls if the syntax check is enabled or disabled (default: 1,
-values: 0 or 1): >
+This option controls if the syntax checking is enabled or disabled
+(default: 1, values: 0 or 1): >
 	:let erlang_show_errors = 1
 
 ------------------------------------------------------------------------------
-                                                    *'erlang_completion_grep'*
+                                                   *'erlang_completion_cache'*
 
-This option defines the grep program used for omni completion (default:
-"zgrep", values: string): >
-	:let erlang_completion_grep = "zgrep"
+This option controls if the omni completion uses a cache to speed up the
+process (default: 1, values: 0 or 1): >
+	:let erlang_completion_cache = 1
 
-Note: zgrep is able to handle compressed and uncompressed man pages, change it
-to "grep" if you don't have installed.
-
-------------------------------------------------------------------------------
-                                             *'erlang_completion_display_doc'*
-
-This option defines whether the arguments and the returned values of the
-functions are shown when using omni completion (default: 1, values: 0 or 1): >
-	:let erlang_completion_display_doc = 1
+Note: it could be useful to disable this cache in order to get always fresh
+      info whenever a module is recompiled.
 
 ==============================================================================
 5. License                                                    *vimerl-license*
 
-Several people have contributed to this plugin (see AUTHORS file), so it
-should be necessary to ask everybody about how its code is licensed. Anyway,
-assume that this is free software.
+Vimerl is released under Vim |license|. Several people have contributed to
+this plugin (see LICENSE file).
 
-Use, copy or modify this code freely. At least try to preserve the names of
-the authors who have participated.
-
- vim:tw=78:ts=8:ft=help:norl:
+ vim: tw=78 ts=8 ft=help

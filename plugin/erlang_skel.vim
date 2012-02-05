@@ -1,6 +1,7 @@
 " Vim plugin file
 " Language: Erlang
 " Author:   Ricardo Catalinas Jiménez <jimenezrick@gmail.com>
+" License:  Vim license
 " Version:  2011/09/10
 
 if exists('g:loaded_erlang_skel') || v:version < 700 || &compatible
