@@ -8,7 +8,8 @@
 %% Supervisor callbacks
 -export([init/1]).
 
--define(SERVER, ?MODULE).
+-define(CHILD(Id, Mod, Type, Args), {Id, {Mod, start_link, Args},
+                                     permanent, 5000, Type, [Mod]}).
 
 %%%===================================================================
 %%% API functions
@@ -22,7 +23,7 @@
 %% @end
 %%--------------------------------------------------------------------
 start_link() ->
-        supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %%%===================================================================
 %%% Supervisor callbacks
@@ -42,22 +43,8 @@ start_link() ->
 %% @end
 %%--------------------------------------------------------------------
 init([]) ->
-        RestartStrategy = one_for_one,
-        MaxRestarts = 1000,
-        MaxSecondsBetweenRestarts = 3600,
-
-        SupFlags = {RestartStrategy, MaxRestarts, MaxSecondsBetweenRestarts},
-
-        Restart = permanent,
-        Shutdown = 2000,
-        Type = worker,
-
-        AChild = {'AName', {'AModule', start_link, []},
-                          Restart, Shutdown, Type, ['AModule']},
-
-        {ok, {SupFlags, [AChild]}}.
+    {ok, {{one_for_one, 5, 10}, [?CHILD('SomeChild', 'SomeModule', worker, [])]}}.
 
 %%%===================================================================
 %%% Internal functions
 %%%===================================================================
-

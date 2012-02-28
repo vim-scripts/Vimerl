@@ -1,4 +1,5 @@
 #!/usr/bin/env escript
+%%! -detached
 
 -mode(compile).
 
@@ -158,8 +159,12 @@ parse_tokens(Tokens = [{atom, _, _} | _]) ->
 parse_tokens(Tokens) ->
     throw({parse_error, Tokens, #state{}, ?LINE}).
 
-parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
+parse_attribute([T = {'-', _}, {atom, _, export} | Tokens], State = #state{stack = []}) ->
+    parse_next(Tokens, push(State, T, -1));
+parse_attribute([T = {'-', _}, {atom, _, spec} | Tokens], State = #state{stack = []}) ->
     parse_next(Tokens, push(State, T, 1));
+parse_attribute([T = {'-', _} | Tokens], State = #state{stack = []}) ->
+    parse_next(Tokens, push(State, T, 0));
 parse_attribute(Tokens, State) ->
     throw({parse_error, Tokens, State, ?LINE}).
 
@@ -193,6 +198,13 @@ parse_next2([T1 | Tokens], State = #state{stack = [T2 | _]}) when ?CLOSE_BRACKET
             parse_next(Tokens, pop(State));
         false ->
             throw({parse_error, [T1 | Tokens], State, ?LINE})
+    end;
+parse_next2([T1 = {'||', _} | Tokens], State = #state{stack = [T2 | _]}) when ?IS(T2, '['); ?IS(T2, '<<') ->
+    case same_line(T1, Tokens) of
+        true ->
+            parse_next(Tokens, reindent(State, 1, column(T1) + 2));
+        false ->
+            parse_next(Tokens, reindent(State, 0))
     end;
 parse_next2([{'=', _} | Tokens], State = #state{stack = [T | _]}) when ?OPEN_BRACKET(T) ->
     parse_next(Tokens, State);
@@ -269,6 +281,14 @@ indent_after([], State, _) ->
 indent_after(_Tokens, State, OffTab) ->
     indent(State, OffTab).
 
+reindent(State, OffTab) ->
+    reindent(State, OffTab, none).
+
+reindent(State, OffTab, Col) ->
+    [Tab | Tabs] = State#state.tabs,
+    [_ | Cols] = State#state.cols,
+    State#state{tabs = [Tab + OffTab | Tabs], cols = [Col | Cols]}.
+
 unindent(State = #state{tabs = Tabs, cols = Cols}) ->
     State#state{tabs = tl(Tabs), cols = tl(Cols)}.
 
@@ -285,7 +305,7 @@ next_relevant_token(Tokens) ->
     lists:dropwhile(fun(T) -> irrelevant_token(T) end, Tokens).
 
 irrelevant_token(Token) ->
-    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '=', '->', ',', ';', dot],
+    Chars = ['(', ')', '{', '}', '[', ']', '<<', '>>', '=', '->', '||', ',', ';', dot],
     Keywords = ['fun', 'receive', 'if', 'case', 'try', 'of', 'catch', 'after', 'end'],
     Cat = category(Token),
     not lists:member(Cat, Chars ++ Keywords).

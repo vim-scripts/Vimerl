@@ -71,7 +71,7 @@ endfunction
 function ErlangFoldText()
 	let line    = getline(v:foldstart)
 	let foldlen = v:foldend - v:foldstart + 1
-	let lines   = ' ' . foldlen . ' lines: ' . substitute(line, "[\ \t]*", '', '')
+	let lines   = ' ' . foldlen . ' lines: ' . substitute(line, "[ \t]*", '', '')
 	if foldlen < 10
 		let lines = ' ' . lines
 	endif

@@ -1,3 +1,5 @@
+%%% vim: expandtab tabstop=4 shiftwidth=4
+
 -module(test).
 
 -export([foo/0,
@@ -6,13 +8,63 @@
         ]).
 
 -export([
-            foo/1,
-            baaaaar/2,
-            baaaaaaaaa/4]).
+    foo/1,
+    baaaaar/2,
+    baaaaaaaaa/4]).
+
+-define(FOO,
+        666 + 777).
+
+-vsn(
+    "My beta version"
+    ).
 
 -spec foo(X) -> {ok, Key} | {false, X} when
     X :: iter(),
     Key :: integer().
+
+foo() ->
+    L = [1, 2
+         3
+        ],
+    L2 = lists:map(fun(N) ->
+                    N + 1
+            end, L),
+    L3 = lists:map(
+            fun(N) ->
+                    N + 2
+            end,
+            L),
+    L4 = lists:map(
+            fun
+                (1) ->
+                    N + 1;
+                (2) ->
+                    N + 2;
+                (_) ->
+                    N
+            end, L).
+
+foo() ->
+    case
+        {foooooooooooooooooo,
+         baaaaaaaaaaaaaaaaar}
+    of
+        ok ->
+            ok
+    end,
+    X = [{a, b}, c,
+         {d, e, f,
+          g}],
+    Y = <<X, X, X,
+          X, X, X>>,
+    [{X, Y, Z} || X <- L1,
+                  Y <- L2,
+                  Z <- L3],
+    [{X, Y, Z} ||
+        X <- L1,
+        Y <- L2,
+        Z <- L3].
 
 foo() ->
     bar(fun foo/0,
